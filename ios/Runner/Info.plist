@@ -45,5 +45,20 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Rovu uses your location to show runs and clubs near you.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Rovu needs access to your photos so you can set a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Rovu needs access to your camera so you can take a profile picture.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.supabase.rovu</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -38,6 +38,11 @@ dependencies:
   flutter_dotenv: ^6.0.1
   video_player: ^2.11.1
   google_fonts: ^8.1.0
+  sign_in_with_apple: ^7.0.1
+  crypto: ^3.0.7
+  image_picker: ^1.2.2
+  permission_handler: ^12.0.3
+  device_info_plus: ^11.5.0
 
 # Pin device_info_plus below 13.2.0. v13.2.0 calls the iOS 26.1-only
 # `isiOSAppOnVision` selector, which fails to compile on Xcode < 26.
@@ -99,7 +104,10 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
   assets:
+    - .env
     - assets/rovuicon.png
+    - assets/googlepng.png
+    - assets/club.jpeg
     - assets/video1.mp4
     - assets/google_fonts/
 
