@@ -46,4 +46,29 @@ class UserProfile {
       avatarPath: avatarPath ?? this.avatarPath,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'questionnaire': questionnaire,
+        'displayName': displayName,
+        'bio': bio,
+        'email': email,
+        'authProvider': authProvider,
+        'userId': userId,
+        'avatarPath': avatarPath,
+      };
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final rawAnswers = json['questionnaire'];
+    return UserProfile(
+      questionnaire: rawAnswers is Map
+          ? rawAnswers.map((k, v) => MapEntry('$k', '$v'))
+          : const {},
+      displayName: json['displayName'] as String?,
+      bio: json['bio'] as String?,
+      email: json['email'] as String?,
+      authProvider: json['authProvider'] as String?,
+      userId: json['userId'] as String?,
+      avatarPath: json['avatarPath'] as String?,
+    );
+  }
 }

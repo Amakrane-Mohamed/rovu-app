@@ -154,12 +154,15 @@ class AppTheme {
   static ThemeData dark() {
     final base = ThemeData.dark(useMaterial3: true);
     return base.copyWith(
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: const Color(0xFFEC3407),
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
+        seedColor: const Color(0xFFE2FF3D),
         brightness: Brightness.dark,
         surface: AppColors.surface,
-      ).copyWith(primary: AppColors.primary),
+      ).copyWith(
+        primary: const Color(0xFFE2FF3D),
+        surface: const Color(0xFFEC3407),
+      ),
       textTheme: GoogleFonts.archivoTextTheme(base.textTheme).apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,

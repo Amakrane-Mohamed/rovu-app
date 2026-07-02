@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'get_started_screen.dart';
+import 'home/home_screen.dart';
 import 'models/user_profile.dart';
 import 'onboarding/auth_screen.dart';
 import 'onboarding/permissions_screen.dart';
@@ -10,8 +10,10 @@ import 'onboarding/profile_setup_screen.dart';
 import 'onboarding/promise_screen.dart';
 import 'onboarding/questionnaire_screen.dart';
 import 'onboarding/runs_near_you_screen.dart';
+import 'services/app_session_service.dart';
 import 'services/auth_service.dart';
 import 'splash_screen.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +39,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ROVU',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textTheme: GoogleFonts.barlowCondensedTextTheme(),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFEC3407)),
-      ),
+      theme: AppTheme.dark(),
       home: const RootPage(),
     );
   }
@@ -69,11 +68,63 @@ class _RootPageState extends State<RootPage> {
   _Stage _stage = _Stage.splash;
   UserProfile _profile = const UserProfile();
 
+  bool _sessionReady = false;
+  bool _splashDone = false;
+  bool _resumeToHome = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSession();
+  }
+
+  Future<void> _loadSession() async {
+    final session = await AppSessionService.instance.restore();
+    final auth = AuthService.instance;
+
+    UserProfile profile = session.profile;
+    if (auth.isSignedIn) {
+      final user = auth.currentUser!;
+      profile = profile.copyWith(
+        userId: user.id,
+        email: user.email ?? profile.email,
+      );
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _profile = profile;
+      _resumeToHome = session.isOnboardingComplete;
+      _sessionReady = true;
+    });
+    _maybeLeaveSplash();
+  }
+
+  void _maybeLeaveSplash() {
+    if (!_sessionReady || !_splashDone || !mounted) return;
+    setState(() {
+      _stage = _resumeToHome ? _Stage.home : _Stage.getStarted;
+    });
+  }
+
+  Future<void> _finishOnboarding(UserProfile profile) async {
+    await AppSessionService.instance.saveCompleted(profile);
+    if (!mounted) return;
+    setState(() {
+      _profile = profile;
+      _stage = _Stage.home;
+      _resumeToHome = true;
+    });
+  }
+
   Widget _current() {
     switch (_stage) {
       case _Stage.splash:
         return SplashScreen(
-          onFinished: () => setState(() => _stage = _Stage.getStarted),
+          onFinished: () {
+            _splashDone = true;
+            _maybeLeaveSplash();
+          },
         );
       case _Stage.getStarted:
         return GetStartedScreen(
@@ -116,13 +167,10 @@ class _RootPageState extends State<RootPage> {
       case _Stage.profile:
         return ProfileSetupScreen(
           profile: _profile,
-          onFinished: (profile) => setState(() {
-            _profile = profile;
-            _stage = _Stage.home;
-          }),
+          onFinished: _finishOnboarding,
         );
       case _Stage.home:
-        return HomePage(profile: _profile);
+        return const HomeScreen();
     }
   }
 
@@ -131,60 +179,6 @@ class _RootPageState extends State<RootPage> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       child: _current(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key, required this.profile});
-
-  final UserProfile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final name = profile.displayName ?? 'Runner';
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text('ROVU'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome, $name',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (profile.bio != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                profile.bio!,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 15,
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
-            Text(
-              'Your profile is set. Runs and clubs will appear here.',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.55),
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

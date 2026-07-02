@@ -43,6 +43,7 @@ dependencies:
   image_picker: ^1.2.2
   permission_handler: ^12.0.3
   device_info_plus: ^11.5.0
+  shared_preferences: ^2.5.3
 
 # Pin device_info_plus below 13.2.0. v13.2.0 calls the iOS 26.1-only
 # `isiOSAppOnVision` selector, which fails to compile on Xcode < 26.

@@ -55,6 +55,10 @@ class AuthService {
     return Supabase.instance.client;
   }
 
+  bool get isSignedIn => _client?.auth.currentSession != null;
+
+  User? get currentUser => _client?.auth.currentUser;
+
   /// Native Apple sign-in on iOS; web OAuth elsewhere.
   Future<AuthResult> signInWithApple() async {
     final client = _client;
